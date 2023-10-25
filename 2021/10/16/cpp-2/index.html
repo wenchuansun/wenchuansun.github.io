@@ -1,0 +1,223 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>深入理解 C++ 中的引用和指针 | Nino's blog</title><meta name="keywords" content="C++"><meta name="author" content="Nino"><meta name="copyright" content="Nino"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="通过反汇编查看在二进制指令上引用和指针的联系与区别，理解其在不同编译阶段的特点。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深入理解 C++ 中的引用和指针">
+<meta property="og:url" content="http://106.14.133.244/2021/10/16/cpp-2/index.html">
+<meta property="og:site_name" content="Nino&#39;s blog">
+<meta property="og:description" content="通过反汇编查看在二进制指令上引用和指针的联系与区别，理解其在不同编译阶段的特点。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://106.14.133.244/img/blogCover/1.jpg">
+<meta property="article:published_time" content="2021-10-16T06:48:58.000Z">
+<meta property="article:modified_time" content="2023-10-25T09:51:48.000Z">
+<meta property="article:author" content="Nino">
+<meta property="article:tag" content="C++">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://106.14.133.244/img/blogCover/1.jpg"><link rel="shortcut icon" href="/img/touxiang.jpg"><link rel="canonical" href="http://106.14.133.244/2021/10/16/cpp-2/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '深入理解 C++ 中的引用和指针',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: false,
+  postUpdate: '2023-10-25 17:51:48'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const now = new Date()
+          const hour = now.getHours()
+          const isNight = hour <= 6 || hour >= 18
+          if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+          else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const fontSizeVal = saveToLocal.get('global-font-size')
+    if (fontSizeVal !== undefined) {
+      document.documentElement.style.setProperty('--global-font-size', fontSizeVal + 'px')
+    }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><link rel="stylesheet" href="../../css/mycss.css"><meta name="generator" content="Hexo 5.4.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/touxiang.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">56</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">25</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">8</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友情链接</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="not-top-img" id="page-header"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">Nino's blog</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友情链接</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav></header><main class="layout" id="content-inner"><div id="post"><div id="post-info"><h1 class="post-title">深入理解 C++ 中的引用和指针</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-10-16T06:48:58.000Z" title="发表于 2021-10-16 14:48:58">2021-10-16</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-10-25T09:51:48.000Z" title="更新于 2023-10-25 17:51:48">2023-10-25</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/C/">C++</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="深入理解 C++ 中的引用和指针"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div><article class="post-content" id="article-container"><p>首先引用一段 <strong>Stroustrup</strong> 在 <em>C++ Style and Technique FAQ</em> 中的一段话</p>
+<blockquote>
+<p><strong>Why does C++ have both pointers and references?</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C++ inherited pointers from C, so I couldn’t remove them without causing serious compatibility problems. References are useful for several things, but the direct reason I introduced them in C++ was to support operator overloading. </p>
+</blockquote>
+<h2 id="引用和指针的定义"><a href="#引用和指针的定义" class="headerlink" title="引用和指针的定义"></a>引用和指针的定义</h2><p><code>引用（reference）</code>：一个已经存在的对象的别名，<strong>引用并非对象</strong>。<br><code>指针（pointer）</code>：用来存放地址的一种类型，指向内存中某块存储单元，<strong>指针本身就是对象</strong>。</p>
+<hr>
+<h2 id="从引用不是对象，指针是对象来看他们的区别："><a href="#从引用不是对象，指针是对象来看他们的区别：" class="headerlink" title="从引用不是对象，指针是对象来看他们的区别："></a>从<font color='red'>引用不是对象，指针是对象</font>来看他们的区别：</h2><ul>
+<li>引用不是一个对象，故程序不会为一个引用分配内存区域；而指针本身就是一个对象，故程序会为指针变量分配内存区域。</li>
+<li>引用不可以为空，在定义时必须初始化，且之后无法改变；指针可以不初始化（不推荐），在生命周期内可以指向不同的对象。<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> i, j;</span><br><span class="line"><span class="keyword">int</span> &amp;reference;			<span class="comment">//非法，引用必须初始化</span></span><br><span class="line"><span class="keyword">int</span> &amp;reference = i; 	<span class="comment">//合法</span></span><br><span class="line">reference = j;			<span class="comment">//非法，引用并非对象，不能对其进行赋值操作</span></span><br><span class="line"><span class="keyword">int</span> *pointer; 			<span class="comment">//合法，指针是一个对象，不进行初始化可以通过编译</span></span><br><span class="line">pointer = &amp;j; 			<span class="comment">//合法，指针是一个对象，可以对其进行赋值操作</span></span><br></pre></td></tr></table></figure></li>
+<li>引用只能为一级，指针可以为多级。<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> **pointer1;         <span class="comment">// 合法。指向指针的指针</span></span><br><span class="line"><span class="keyword">int</span> *&amp;reference1;       <span class="comment">// 合法。指向指针的引用</span></span><br><span class="line"><span class="keyword">int</span> &amp;*pointer2;         <span class="comment">// 非法。指向引用的指针是非法的</span></span><br><span class="line"><span class="keyword">int</span> &amp;&amp;reference2;       <span class="comment">// 非法。指向引用的引用是非法的</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<blockquote>
+<p>Tips：对于上面的 reference1 怎么理解它的类型，最简单的办法是从右往左阅读 reference1 的定义。离变量名最近的符号（此例中是 &amp;reference1 的符号 <code>&amp;</code> ）对变量的类型有最直接的影响，因此 reference1 是一个引用。声明符其余的部分可以确定 reference1 引用的类型是什么是，此例中的符号 <code>*</code> 说明 reference1 引用的是一个指针。最后，声明的基本数据类型部分指出 reference1 引用的是一个 int 指针。</p>
+</blockquote>
+<ul>
+<li>没有空引用，但有空指针（nullptr）。</li>
+</ul>
+<hr>
+<h1 id="引用传递和指针传递"><a href="#引用传递和指针传递" class="headerlink" title="引用传递和指针传递"></a>引用传递和指针传递</h1><p>在写函数的形参的时候，我们可以使用引用传递和指针传递，达到在函数中对实际变量的内存空间操作的目的。当指针和引用作为函数的参数是如何传值的呢？</p>
+<ul>
+<li>引用传递过程中，被调函数的形式参数也作为局部变量在栈中开辟了内存空间，但是这时存放的是由主调函数放进来的实参变量的地址。被调函数对形参的任何操作都被处理成间接寻址，即通过栈中存放的地址访问主调函数中的实参变量。正因为如此，被调函数对形参做的任何操作都影响了主调函数中的实参变量。</li>
+<li>指针传递参数本质上是值传递的方式，它所传递的是一个地址值。值传递过程中，被调函数的形式参数作为被调函数的局部变量处理，即在栈中开辟了内存空间以存放由主调函数放进来的实参的值，从而成为了实参的一个副本。值传递的特点是被调函数对形式参数的任何操作都是作为局部变量进行，不会影响主调函数的实参变量的值。</li>
+</ul>
+<p>从高级程序员的角度来看，引用传递和指针传递是不同的。虽然它们都是在被调函数栈空间上的一个局部变量，但是任何对于引用参数的处理都会通过一个<strong>间接寻址</strong>的方式操作到主调函数中的相关变量，<strong>又因为引用不是一个对象，所以在被调函数的函数体中是不可以改变引用的指向的，被调函数对引用的任何操作，都会实际上反射到调用函数传过来的实参变量上</strong>。而对于指针传递的参数，如果改变被调函数中的指针地址 <strong>（指针是一个对象，如果没有被声明为常量指针，在被调函数中是可以重新赋值的）</strong>，它将影响不到主调函数的相关变量。从这个角度来看，引用比指针是更安全的。</p>
+<p><strong><font color='orange'>那么引用传递和指针传递在机器指令层面上有什么区别吗？性能上是否有所差距？</font></strong><br>对于如下的 cpp 代码编译，进行反汇编：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">funcr</span><span class="params">(<span class="keyword">int</span> &amp;a)</span></span>&#123;</span><br><span class="line">	a = <span class="number">9</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">funcp</span><span class="params">(<span class="keyword">int</span> *a)</span></span>&#123;</span><br><span class="line">	*a = <span class="number">8</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="keyword">int</span> a = <span class="number">10</span>;</span><br><span class="line">	<span class="built_in">funcr</span>(a);	<span class="comment">//引用传递</span></span><br><span class="line">	<span class="built_in">funcp</span>(&amp;a);	<span class="comment">//指针传递</span></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>得到 main 函数在调用 funcr 和 funcp 处的汇编代码：<br><img src="assembly.png"></p>
+<p>可以看到，无论是引用传递还是指针传递，<strong>在汇编层都是传递变量的地址</strong>，这样的话，引用传递和指针传递实际上得到机器指令应该是一样的，那性能也是一样的。那我们可以这样理解引用传递和指针传递，这两种传参方式只是在编译层面有所不同，是属于高级语言本身的特质，仅仅在语义检查的时候进行区分，而不是在二进制代码进行区分。<br><strong><font color='red'>心得：可以用引用传递的地方一定用引用传递而不用指针传递，把琐碎的事情留给编译器去检查，加强程序的安全性。</font></strong></p>
+<hr>
+<blockquote>
+<p>参考资料：《C++ Prime》&nbsp;&nbsp;&nbsp;&nbsp;<em>C++ Style and Technique FAQ</em></p>
+</blockquote>
+</article><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/C/">C++</a></div><div class="post_share"><div class="social-share" data-image="/img/blogCover/1.jpg" data-sites="twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2021/10/17/cpp-3/"><img class="prev-cover" src="/img/blogCover/5.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">C++ 中 const 的那些事</div></div></a></div><div class="next-post pull-right"><a href="/2021/10/16/cpp-1/"><img class="next-cover" src="/img/blogCover/3.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">C++ 中的字面值常量</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2021/10/16/cpp-1/" title="C++ 中的字面值常量"><img class="cover" src="/img/blogCover/3.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-10-16</div><div class="title">C++ 中的字面值常量</div></div></a></div><div><a href="/2021/10/21/cpp-10/" title="C++11 中的 =default 的含义"><img class="cover" src="/img/blogCover/25.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-10-21</div><div class="title">C++11 中的 =default 的含义</div></div></a></div><div><a href="/2021/10/21/cpp-11/" title="C++ 类类型转换"><img class="cover" src="/img/blogCover/26.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-10-21</div><div class="title">C++ 类类型转换</div></div></a></div><div><a href="/2021/10/21/cpp-12/" title="C++ IO 标准库"><img class="cover" src="/img/blogCover/1.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-10-21</div><div class="title">C++ IO 标准库</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/touxiang.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Nino</div><div class="author-info__description">Master, teaching makes you.</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">56</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">25</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">8</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/wenchuansun"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/wenchuansun" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="https://leetcode-cn.com/u/tempestate_" target="_blank" title="leetcode"><i class="fas fa-laptop"></i></a></div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/04/16/llvm-5/" title="学会调试 LLVM opt 中的 PassManager 和 AnalysisManager"><img src="/img/blogCover/4.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="学会调试 LLVM opt 中的 PassManager 和 AnalysisManager"/></a><div class="content"><a class="title" href="/2022/04/16/llvm-5/" title="学会调试 LLVM opt 中的 PassManager 和 AnalysisManager">学会调试 LLVM opt 中的 PassManager 和 AnalysisManager</a><time datetime="2022-04-16T06:19:45.000Z" title="发表于 2022-04-16 14:19:45">2022-04-16</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/04/16/llvm-4/" title="怎么基于 Pass New Manager 利用 PassPlugin 写 LLVM Pass（out-of-tree Pass Development）"><img src="/img/blogCover/3.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="怎么基于 Pass New Manager 利用 PassPlugin 写 LLVM Pass（out-of-tree Pass Development）"/></a><div class="content"><a class="title" href="/2022/04/16/llvm-4/" title="怎么基于 Pass New Manager 利用 PassPlugin 写 LLVM Pass（out-of-tree Pass Development）">怎么基于 Pass New Manager 利用 PassPlugin 写 LLVM Pass（out-of-tree Pass Development）</a><time datetime="2022-04-16T06:18:11.000Z" title="发表于 2022-04-16 14:18:11">2022-04-16</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/04/16/llvm-3/" title="怎样在 opt 中利用 new PassManager 中写 Pass"><img src="/img/blogCover/2.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="怎样在 opt 中利用 new PassManager 中写 Pass"/></a><div class="content"><a class="title" href="/2022/04/16/llvm-3/" title="怎样在 opt 中利用 new PassManager 中写 Pass">怎样在 opt 中利用 new PassManager 中写 Pass</a><time datetime="2022-04-16T06:16:18.000Z" title="发表于 2022-04-16 14:16:18">2022-04-16</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/03/31/underlyingPrinciple-9/" title="深入理解对象内存模型（二）"><img src="/img/blogCover/1.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="深入理解对象内存模型（二）"/></a><div class="content"><a class="title" href="/2022/03/31/underlyingPrinciple-9/" title="深入理解对象内存模型（二）">深入理解对象内存模型（二）</a><time datetime="2022-03-31T12:05:47.000Z" title="发表于 2022-03-31 20:05:47">2022-03-31</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2023 By Nino</div><div class="footer_custom_text">Hi, welcome to my pretty blog!</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a><!--<img src="https://static.dy208.cn/o_1dfilp8ruo521thr1hvf18ji17soa.png">--><a href="http://www.beian.miit.gov.cn/" target="_blank"> | 湘ICP备2022001549号-1</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="font-plus" type="button" title="放大字体"><i class="fas fa-plus"></i></button><button id="font-minus" type="button" title="缩小字体"><i class="fas fa-minus"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="chat_btn" type="button" title="rightside.chat_btn"><i class="fas fa-sms"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"></div><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = false;
+POWERMODE.mobile = true;
+document.body.addEventListener('input', POWERMODE);
+</script><script>(function(d, w, c) {
+    w.ChatraID = 'yEBQMsndkiJxuHuQb';
+    var s = d.createElement('script');
+    w[c] = w[c] || function() {
+        (w[c].q = w[c].q || []).push(arguments);
+    };
+    s.async = true;
+    s.src = 'https://call.chatra.io/chatra.js';
+    if (d.head) d.head.appendChild(s);
+})(document, window, 'Chatra');
+
+if (true) {
+  var chatBtnFn = () => {
+    var chatBtn = document.getElementById("chat_btn")
+    chatBtn.addEventListener("click", function(){
+      Chatra('openChat')
+    });
+  }
+  chatBtnFn()
+} else {
+  if (false) {
+    function chatBtnHide () {
+      Chatra('hide')
+    }
+    function chatBtnShow () {
+      Chatra('show')
+    }
+  }
+}</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

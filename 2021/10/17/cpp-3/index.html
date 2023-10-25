@@ -1,0 +1,227 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>C++ 中 const 的那些事 | Nino's blog</title><meta name="keywords" content="C++"><meta name="author" content="Nino"><meta name="copyright" content="Nino"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="从编译前端语法树和二进制代码的角度理解 const 关键字。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="C++ 中 const 的那些事">
+<meta property="og:url" content="http://106.14.133.244/2021/10/17/cpp-3/index.html">
+<meta property="og:site_name" content="Nino&#39;s blog">
+<meta property="og:description" content="从编译前端语法树和二进制代码的角度理解 const 关键字。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://106.14.133.244/img/blogCover/5.jpg">
+<meta property="article:published_time" content="2021-10-17T08:07:12.000Z">
+<meta property="article:modified_time" content="2023-10-25T09:51:48.000Z">
+<meta property="article:author" content="Nino">
+<meta property="article:tag" content="C++">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://106.14.133.244/img/blogCover/5.jpg"><link rel="shortcut icon" href="/img/touxiang.jpg"><link rel="canonical" href="http://106.14.133.244/2021/10/17/cpp-3/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'C++ 中 const 的那些事',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2023-10-25 17:51:48'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const now = new Date()
+          const hour = now.getHours()
+          const isNight = hour <= 6 || hour >= 18
+          if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+          else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const fontSizeVal = saveToLocal.get('global-font-size')
+    if (fontSizeVal !== undefined) {
+      document.documentElement.style.setProperty('--global-font-size', fontSizeVal + 'px')
+    }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><link rel="stylesheet" href="../../css/mycss.css"><meta name="generator" content="Hexo 5.4.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/touxiang.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">56</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">25</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">8</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友情链接</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="not-top-img" id="page-header"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">Nino's blog</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友情链接</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav></header><main class="layout" id="content-inner"><div id="post"><div id="post-info"><h1 class="post-title">C++ 中 const 的那些事</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-10-17T08:07:12.000Z" title="发表于 2021-10-17 16:07:12">2021-10-17</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-10-25T09:51:48.000Z" title="更新于 2023-10-25 17:51:48">2023-10-25</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/C/">C++</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="C++ 中 const 的那些事"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div><article class="post-content" id="article-container"><h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p><strong>const</strong> 关键字常被用于定义一个常量，用法较多的可能是定义<strong>常量指针</strong>、<strong>指向常量的指针</strong>和<strong>指向常量的引用</strong>，但是 <strong>const</strong> 还是有很多冷门的语法特性，如果使用不当，可能会导致我们写的代码不符合预期，且很难找到错误，因此作如下总结。</p>
+<hr>
+<h1 id="const-和引用"><a href="#const-和引用" class="headerlink" title="const 和引用"></a>const 和引用</h1><p>由于引用本身不是一个对象，所以引用在初始化的时候只能绑定在对象上，而不能与<strong>字面值</strong>或<strong>某个表达式的计算结果</strong>绑定在一起，且引用的类型必须和与之绑定的对象严格匹配。如下示例对引用的使用方式，是无法通过编译的：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">double</span> d = <span class="number">3.14</span>;</span><br><span class="line"><span class="keyword">int</span> &amp;r1 = d;	<span class="comment">//错误，将一个int型的引用绑定到double类型的变量</span></span><br><span class="line"><span class="keyword">int</span> &amp;r2 = <span class="number">10</span>;	<span class="comment">//错误，将一个引用绑定到一个字面值常量</span></span><br></pre></td></tr></table></figure>
+<p><font color='red'><strong>但是当 const 和引用一起用的时候，则有了特殊变化</strong></font></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">double</span> d = <span class="number">3.14</span>;</span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> &amp;r3 = <span class="number">41</span>;	<span class="comment">//编译通过，r3绑定了一个字面值常量</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> &amp;r4 = d;	<span class="comment">//编译通过，r4绑定了一个临时的int型变量</span></span><br></pre></td></tr></table></figure>
+<p>在上述 <code>const int &amp;r3 = 41</code> 这条指令中，引用 <strong>r3</strong> 绑定了一个字面值常量 <strong>41</strong> ，这看起来似乎很不合逻辑，因为引用本身并不是一个对象，则有了如下问题：①．这个 <strong>41</strong> 应该存放在哪呢？且在 <code>const int &amp;r4 = d</code> 这条指令中，<strong>d</strong> 是一个 <strong>double</strong> 类型的变量。②．为什么可以绑定到一个 <strong>const int</strong> 类型的引用 <strong>r4</strong> 上呢？③．如果 <strong>d</strong> 被修改了，<strong>r4</strong> 会改变吗？通过将上述代码编译后反汇编，如下图所示：</p>
+<p><img src="ida.png"></p>
+<ul>
+<li>① 可以看到，红色框内的汇编代码代表编译器自动在栈中生成了一个内存空间用来存放字面值常量 <strong>41</strong> ，然后令 <strong>r3</strong> 绑定到该内存空间，但注意，由于在 C++ 源代码中，<strong>r3</strong> 被声明为了 <strong>const</strong> 类型，所以即使其在底层确实指向了一个内存空间，但 C++ 程序员仍然不能通过代码来修改其值。</li>
+<li>② 在黄色框内的汇编代码代表将 <strong>double</strong> 类型的变量 <strong>d</strong> 经过强制转换生成一个临时的整型量，然后将其存放在编译器生成的内存空间 <strong>temp_d</strong> 中，然后再令 <strong>r4</strong> 与该内存空间绑定。</li>
+<li>③ 由以上可知，<strong>r4</strong> 所绑定的内存空间与变量 <strong>d</strong> 所在的内存空间不是同一块内存空间，所以修改 <strong>d</strong> 的值不会改变 <strong>r4</strong> 所绑定的值。测试以下代码：<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">double</span> d = <span class="number">3.14</span>;</span><br><span class="line">	<span class="keyword">const</span> <span class="keyword">int</span> &amp;r4 = d;</span><br><span class="line"></span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;befor modify ================ \nr4: &quot;</span> &lt;&lt; r4 &lt;&lt; <span class="string">&quot;\nd: &quot;</span> &lt;&lt; d &lt;&lt; endl;</span><br><span class="line">	d = <span class="number">6.28</span>;</span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;after modify ================ \nr4: &quot;</span> &lt;&lt; r4 &lt;&lt; <span class="string">&quot;\nd: &quot;</span> &lt;&lt; d &lt;&lt; endl;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// output:</span></span><br><span class="line">llvm@ubuntu:~/learning$ ./a.out</span><br><span class="line">befor modify ================ </span><br><span class="line">r4: <span class="number">3</span></span><br><span class="line">d: <span class="number">3.14</span></span><br><span class="line">after modify ================ </span><br><span class="line">r4: <span class="number">3</span></span><br><span class="line">d: <span class="number">6.28</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<hr>
+<h1 id="默认状态下，const-对象仅在文件内有效"><a href="#默认状态下，const-对象仅在文件内有效" class="headerlink" title="默认状态下，const 对象仅在文件内有效"></a>默认状态下，const 对象仅在文件内有效</h1><p>对于一般我们定义的全局对象是具有全局链接属性的，也就是说在 <strong>a</strong> 文件中定义的全局对象，只需要在 <strong>b</strong> 文件中用 <strong>extern</strong> 关键字声明即可。但是 <strong>const</strong>  对象默认是<font color='red'><strong>仅仅在文件内有效</strong></font>， 也就是说在文件 <strong>a</strong> 中定义一个 <strong>const</strong> 对象，在 <strong>b</strong> 文件中是无法访问的，即使在 <strong>b</strong> 文件中用了 <strong>extern</strong> 关键字来声明。那么如何将定义的 <strong>const</strong> 对象加上全局属性呢？其实很简单，只需要在定义时加上 <strong>extern</strong> 关键字修饰即可。如下例：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// a.cpp</span></span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">const</span> <span class="keyword">int</span> a = <span class="number">10</span>;	<span class="comment">//定义</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// b.cpp</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">const</span> <span class="keyword">int</span> a;			<span class="comment">//声明</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	cout &lt;&lt; a &lt;&lt; endl;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="const-和类型别名"><a href="#const-和类型别名" class="headerlink" title="const 和类型别名"></a>const 和类型别名</h1><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> i = <span class="number">10</span>;</span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> *p1 = &amp;i; <span class="comment">//p1是一个指向常量的指针</span></span><br><span class="line"><span class="keyword">int</span> *<span class="keyword">const</span> p2 = &amp;i;	<span class="comment">//p2是一个常量指针，其只能指向i</span></span><br></pre></td></tr></table></figure>
+<p>如上述代码所示，<strong>const</strong> 放在不同的位置会有不同的含义，因此也区分出<strong>指向常量的指针</strong>和<strong>常量指针</strong>之分，但是这种规则在和类型别名结合时又有意想不到的结果。如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">char</span>  *pstring;	<span class="comment">//pstring是char *的别名</span></span><br><span class="line"><span class="keyword">const</span> pstring cstr = <span class="literal">nullptr</span>;	<span class="comment">//cstr是一个指向char的常量指针</span></span><br><span class="line">pstring <span class="keyword">const</span> cstr2 = <span class="literal">nullptr</span>; 	<span class="comment">//cstr2是一个指向char的常量指针</span></span><br></pre></td></tr></table></figure>
+<p>可能一般来看，将 <strong>pstring</strong> 展开为 <strong>char</strong>*，则上述第二行代码会被理解为指令 <code>const char * cstr1 = nullptr</code>，也就是将 <strong>cstr</strong> 看成指向常量的指针，但是实际上，它却是一个<strong>常量指针</strong>。这样的话，上述第二行代码和第三行代码中定义的变量就是等价的类型，相当于都执行了 <code>char *const cstr = nullptr</code>。我们也可以通过 <strong>clang</strong> 将上述代码输出，如下：<br><img src="typealias.png"></p>
+<p>显然，<strong>cstr</strong> 和 <strong>cstr2</strong> 是同一个类型，即 <code>char *const</code>。</p>
+<hr>
+<h1 id="const-和-auto"><a href="#const-和-auto" class="headerlink" title="const 和 auto"></a>const 和 auto</h1><p><strong>auto</strong> 是让编译器根据初始值来推断所定义的变量的类型，在 <strong>auto</strong> 的推断过程中，一般遵循两个原则：</p>
+<ul>
+<li>当引用被当做初始值的时候，真正用于推断 <strong>auto</strong> 类型的初始值实际上是引用对象的值。</li>
+<li>当用于推断 <strong>auto</strong> 类型的初始值是常量时，如果可以忽略其常量性质，则忽略其常量性质。</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> c1 = i;</span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> &amp;c2 = i;</span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> *p2 = &amp;i;</span><br><span class="line"><span class="keyword">int</span> *<span class="keyword">const</span> p3 = &amp;i;</span><br><span class="line"><span class="keyword">auto</span> a = i;		<span class="comment">//i是一个int型变量，所以a是int型</span></span><br><span class="line"><span class="keyword">auto</span> b = c1;	<span class="comment">//c1是一个const int型的常量，初始值本身是个常量，故忽略其常量性质，所以b是int型</span></span><br><span class="line"><span class="keyword">auto</span> c = c2;	<span class="comment">//c2是一个const int &amp;型的引用，所以实际上的初始值是引用对象c1，故c是int型</span></span><br><span class="line"><span class="keyword">auto</span> d = &amp;c1;	<span class="comment">//c1是一个const int型的常量，对其取地址得到的const int*型的初始值，注意该初始值本身并不是一个常量，而是其指向的对象是常量，故d是const int*型</span></span><br><span class="line"><span class="keyword">auto</span> e = p2;	<span class="comment">//p2是一个const int*型，初始值并不是常量，故e是const int*型</span></span><br><span class="line"><span class="keyword">auto</span> f = p3; 	<span class="comment">//p3是一个int *类型的常量指针，所以忽略其常量性质，则f是int *类型</span></span><br><span class="line"><span class="keyword">auto</span> &amp;g = c1;	<span class="comment">//c1是一个const int型的常量，如果忽略其常量性质，则得到g是与从绑定的int &amp;型变量，显然违背了基本原则，所以该处不能忽略c1的常量性质，则g是const int &amp;类型</span></span><br></pre></td></tr></table></figure>
+<p>用 <strong>clang</strong> 语法树验证如下：<br><img src="constauto.png"></p>
+<p><font color='red'>由此可以得出结论， <strong>auto</strong> 在与 <strong>const</strong> 结合的时候，会尽量放弃推断类型时依赖的初始值的 <strong>const</strong> 属性，只有在确实不能放弃其 <strong>const</strong>属性时才会给推断的结果加上 <strong>const 属性</strong>。</font></p>
+<hr>
+<blockquote>
+<p>参考资料： 《C++ Prime》</p>
+</blockquote>
+</article><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/C/">C++</a></div><div class="post_share"><div class="social-share" data-image="/img/blogCover/5.jpg" data-sites="twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2021/10/17/cpp-4/"><img class="prev-cover" src="/img/blogCover/10.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">为什么在 C++ 中 inline 函数要在头文件中定义</div></div></a></div><div class="next-post pull-right"><a href="/2021/10/16/cpp-2/"><img class="next-cover" src="/img/blogCover/1.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">深入理解 C++ 中的引用和指针</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2021/10/16/cpp-1/" title="C++ 中的字面值常量"><img class="cover" src="/img/blogCover/3.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-10-16</div><div class="title">C++ 中的字面值常量</div></div></a></div><div><a href="/2021/10/21/cpp-10/" title="C++11 中的 =default 的含义"><img class="cover" src="/img/blogCover/25.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-10-21</div><div class="title">C++11 中的 =default 的含义</div></div></a></div><div><a href="/2021/10/21/cpp-11/" title="C++ 类类型转换"><img class="cover" src="/img/blogCover/26.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-10-21</div><div class="title">C++ 类类型转换</div></div></a></div><div><a href="/2021/10/21/cpp-12/" title="C++ IO 标准库"><img class="cover" src="/img/blogCover/1.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-10-21</div><div class="title">C++ IO 标准库</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/touxiang.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Nino</div><div class="author-info__description">Master, teaching makes you.</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">56</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">25</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">8</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/wenchuansun"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/wenchuansun" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="https://leetcode-cn.com/u/tempestate_" target="_blank" title="leetcode"><i class="fas fa-laptop"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#const-%E5%92%8C%E5%BC%95%E7%94%A8"><span class="toc-number">2.</span> <span class="toc-text">const 和引用</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%BB%98%E8%AE%A4%E7%8A%B6%E6%80%81%E4%B8%8B%EF%BC%8Cconst-%E5%AF%B9%E8%B1%A1%E4%BB%85%E5%9C%A8%E6%96%87%E4%BB%B6%E5%86%85%E6%9C%89%E6%95%88"><span class="toc-number">3.</span> <span class="toc-text">默认状态下，const 对象仅在文件内有效</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#const-%E5%92%8C%E7%B1%BB%E5%9E%8B%E5%88%AB%E5%90%8D"><span class="toc-number">4.</span> <span class="toc-text">const 和类型别名</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#const-%E5%92%8C-auto"><span class="toc-number">5.</span> <span class="toc-text">const 和 auto</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/04/16/llvm-5/" title="学会调试 LLVM opt 中的 PassManager 和 AnalysisManager"><img src="/img/blogCover/4.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="学会调试 LLVM opt 中的 PassManager 和 AnalysisManager"/></a><div class="content"><a class="title" href="/2022/04/16/llvm-5/" title="学会调试 LLVM opt 中的 PassManager 和 AnalysisManager">学会调试 LLVM opt 中的 PassManager 和 AnalysisManager</a><time datetime="2022-04-16T06:19:45.000Z" title="发表于 2022-04-16 14:19:45">2022-04-16</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/04/16/llvm-4/" title="怎么基于 Pass New Manager 利用 PassPlugin 写 LLVM Pass（out-of-tree Pass Development）"><img src="/img/blogCover/3.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="怎么基于 Pass New Manager 利用 PassPlugin 写 LLVM Pass（out-of-tree Pass Development）"/></a><div class="content"><a class="title" href="/2022/04/16/llvm-4/" title="怎么基于 Pass New Manager 利用 PassPlugin 写 LLVM Pass（out-of-tree Pass Development）">怎么基于 Pass New Manager 利用 PassPlugin 写 LLVM Pass（out-of-tree Pass Development）</a><time datetime="2022-04-16T06:18:11.000Z" title="发表于 2022-04-16 14:18:11">2022-04-16</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/04/16/llvm-3/" title="怎样在 opt 中利用 new PassManager 中写 Pass"><img src="/img/blogCover/2.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="怎样在 opt 中利用 new PassManager 中写 Pass"/></a><div class="content"><a class="title" href="/2022/04/16/llvm-3/" title="怎样在 opt 中利用 new PassManager 中写 Pass">怎样在 opt 中利用 new PassManager 中写 Pass</a><time datetime="2022-04-16T06:16:18.000Z" title="发表于 2022-04-16 14:16:18">2022-04-16</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/03/31/underlyingPrinciple-9/" title="深入理解对象内存模型（二）"><img src="/img/blogCover/1.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="深入理解对象内存模型（二）"/></a><div class="content"><a class="title" href="/2022/03/31/underlyingPrinciple-9/" title="深入理解对象内存模型（二）">深入理解对象内存模型（二）</a><time datetime="2022-03-31T12:05:47.000Z" title="发表于 2022-03-31 20:05:47">2022-03-31</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2023 By Nino</div><div class="footer_custom_text">Hi, welcome to my pretty blog!</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a><!--<img src="https://static.dy208.cn/o_1dfilp8ruo521thr1hvf18ji17soa.png">--><a href="http://www.beian.miit.gov.cn/" target="_blank"> | 湘ICP备2022001549号-1</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="font-plus" type="button" title="放大字体"><i class="fas fa-plus"></i></button><button id="font-minus" type="button" title="缩小字体"><i class="fas fa-minus"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="chat_btn" type="button" title="rightside.chat_btn"><i class="fas fa-sms"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"></div><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = false;
+POWERMODE.mobile = true;
+document.body.addEventListener('input', POWERMODE);
+</script><script>(function(d, w, c) {
+    w.ChatraID = 'yEBQMsndkiJxuHuQb';
+    var s = d.createElement('script');
+    w[c] = w[c] || function() {
+        (w[c].q = w[c].q || []).push(arguments);
+    };
+    s.async = true;
+    s.src = 'https://call.chatra.io/chatra.js';
+    if (d.head) d.head.appendChild(s);
+})(document, window, 'Chatra');
+
+if (true) {
+  var chatBtnFn = () => {
+    var chatBtn = document.getElementById("chat_btn")
+    chatBtn.addEventListener("click", function(){
+      Chatra('openChat')
+    });
+  }
+  chatBtnFn()
+} else {
+  if (false) {
+    function chatBtnHide () {
+      Chatra('hide')
+    }
+    function chatBtnShow () {
+      Chatra('show')
+    }
+  }
+}</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
